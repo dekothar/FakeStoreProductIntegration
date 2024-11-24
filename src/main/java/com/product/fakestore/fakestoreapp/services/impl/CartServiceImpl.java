@@ -13,7 +13,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
- * This Class Performs Logic Integration of various cart related Apis Coming from FakeStore Cart Apis.
+ * This Class Performs Logic Integration of Various Cart Related Apis Coming from FakeStore Cart Apis.
  */
 @Service
 public class CartServiceImpl implements CartService {

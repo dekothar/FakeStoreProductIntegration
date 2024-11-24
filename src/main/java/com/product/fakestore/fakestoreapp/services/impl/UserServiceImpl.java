@@ -14,45 +14,67 @@ import com.product.fakestore.fakestoreapp.models.user.Name;
 import com.product.fakestore.fakestoreapp.models.user.Address;
 import org.springframework.stereotype.Service;
 
+/**
+ * This Class Performs Logic Integration of various User Related Apis Coming from FakeStore User Details Apis.
+ */
 @Service
 public class UserServiceImpl implements UserService {
 
-    private static final String UPDATE_USER="https://fakestoreapi.com/users/{userId}";
-    private static final String ADD_USER="https://fakestoreapi.com/users";
+    private static final String UPDATE_USER = "https://fakestoreapi.com/users/{userId}";
+    private static final String ADD_USER = "https://fakestoreapi.com/users";
 
     @Autowired
     private FakeStoreClient fakeStoreClient;
 
+    /**
+     * This Method Add User Details.
+     *
+     * @param user
+     * @return User
+     */
     @Override
     public User add(User user) {
-        FakeStoreUserDto userdto=from(user);
-        ResponseEntity<FakeStoreUserCreatedResponseDto> response=fakeStoreClient.requestForEntity(ADD_USER, HttpMethod.POST,userdto, FakeStoreUserCreatedResponseDto.class);
-        FakeStoreUserCreatedResponseDto res=response.getBody();
+        FakeStoreUserDto userdto = convertUserDetailsIntoFakeStoreUserDto(user);
+        ResponseEntity<FakeStoreUserCreatedResponseDto> response = fakeStoreClient.requestForEntity(ADD_USER, HttpMethod.POST, userdto, FakeStoreUserCreatedResponseDto.class);
+        FakeStoreUserCreatedResponseDto res = response.getBody();
         user.setId(res.getId());
         return user;
     }
 
+    /**
+     * This Method Updates User Details for Particular UserId Provided.
+     *
+     * @param user
+     * @param userId
+     * @return User
+     */
     @Override
     public User update(User user, Long userId) {
-        FakeStoreUserDto fakeStoreUserRequestDtoInput = from(user);
-        ResponseEntity<FakeStoreUserDto> response=fakeStoreClient.requestForEntity(UPDATE_USER, HttpMethod.PUT,fakeStoreUserRequestDtoInput, FakeStoreUserDto.class,userId);
-        return from(response.getBody());
+        FakeStoreUserDto fakeStoreUserRequestDtoInput = convertUserDetailsIntoFakeStoreUserDto(user);
+        ResponseEntity<FakeStoreUserDto> response = fakeStoreClient.requestForEntity(UPDATE_USER, HttpMethod.PUT, fakeStoreUserRequestDtoInput, FakeStoreUserDto.class, userId);
+        return convertFakeStoreUserDtoIntoUserDetails(response.getBody());
     }
 
-    private User from(FakeStoreUserDto fakeStoreUserRequestDto) {
+    /**
+     * This Helper Method used to Convert FakeStoreUserDto into User Details.
+     *
+     * @param fakeStoreUserRequestDto
+     * @return User
+     */
+    private User convertFakeStoreUserDtoIntoUserDetails(FakeStoreUserDto fakeStoreUserRequestDto) {
         User user = new User();
 
         user.setUsername(fakeStoreUserRequestDto.getUsername());
         user.setPassword(fakeStoreUserRequestDto.getPassword());
         user.setEmail(fakeStoreUserRequestDto.getEmail());
-        if(fakeStoreUserRequestDto.getAddress() != null) {
+        if (fakeStoreUserRequestDto.getAddress() != null) {
             Name name = new Name();
             name.setFirstName(fakeStoreUserRequestDto.getName().getFirstName());
-            name.setLastName(fakeStoreUserRequestDto.getName().getLastname());
+            name.setLastName(fakeStoreUserRequestDto.getName().getLastName());
             user.setName(name);
         }
 
-        if(fakeStoreUserRequestDto.getName() != null) {
+        if (fakeStoreUserRequestDto.getName() != null) {
             Address address = new Address();
             address.setCity(fakeStoreUserRequestDto.getAddress().getCity());
             address.setStreet(fakeStoreUserRequestDto.getAddress().getStreet());
@@ -63,18 +85,24 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
-    private FakeStoreUserDto from(User user) {
+    /**
+     * This Helper Method used to Convert User Details into FakeStoreUserDto.
+     *
+     * @param user
+     * @return FakeStoreUserDto
+     */
+    private FakeStoreUserDto convertUserDetailsIntoFakeStoreUserDto(User user) {
         FakeStoreUserDto fakeStoreUserDto = new FakeStoreUserDto();
         fakeStoreUserDto.setUsername(user.getUsername());
         fakeStoreUserDto.setPassword(user.getPassword());
         fakeStoreUserDto.setEmail(user.getEmail());
-        if(user.getAddress() != null) {
+        if (user.getAddress() != null) {
             FakeStoreUserNameDto name = new FakeStoreUserNameDto();
             name.setFirstName(user.getName().getFirstName());
-            name.setLastname(user.getName().getLastName());
+            name.setLastName(user.getName().getLastName());
             fakeStoreUserDto.setName(name);
         }
-        if(user.getName() != null) {
+        if (user.getName() != null) {
             FakeStoreUserAddressDto address = new FakeStoreUserAddressDto();
             address.setCity(user.getAddress().getCity());
             address.setStreet(user.getAddress().getStreet());

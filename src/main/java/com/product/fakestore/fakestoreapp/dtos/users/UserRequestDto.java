@@ -5,7 +5,12 @@ import com.product.fakestore.fakestoreapp.models.user.Name;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter @Setter
+/**
+ * This Dto is used to return User Details.
+ */
+
+@Getter
+@Setter
 public class UserRequestDto {
 
     private String email;

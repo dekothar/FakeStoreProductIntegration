@@ -54,8 +54,8 @@ public class CartController {
      * This Api Returns the Updated Cart Details for the Particular CartId.
      *
      * @param cartId
-     * @return Cart
      * @Param cart
+     * @return Cart
      */
     @PutMapping("/{cartId}")
     public Cart updateCart(@PathVariable Long cartId, @RequestBody Cart cart) {
