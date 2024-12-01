@@ -8,6 +8,8 @@ import com.product.fakestore.fakestoreapp.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * This CartController Handles Various APi Operations Performed On Users from Fake Store Api of User Details.
  */
@@ -27,6 +29,28 @@ public class UserController {
     @PostMapping
     public User add(@RequestBody UserRequestDto userRequestDto) {
         return userService.add(convertUserRequestDtoIntoUser(userRequestDto));
+    }
+
+    /**
+     * This Api Returns the User Details for the Particular UserId.
+     *
+     * @return User
+     * @Param userId
+     */
+    @GetMapping("/{userId}")
+    public User getUserDetails(@PathVariable long userId) {
+        return userService.getUserDetails(userId);
+    }
+
+    /**
+     * This Api Returns All User Details.
+     *
+     * @return User
+     * @Param userId
+     */
+    @GetMapping("")
+    public List<User> getAllUserDetails() {
+        return userService.getAllUsers();
     }
 
     /**

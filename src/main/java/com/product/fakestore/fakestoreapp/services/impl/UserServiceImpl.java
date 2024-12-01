@@ -14,6 +14,9 @@ import com.product.fakestore.fakestoreapp.models.user.Name;
 import com.product.fakestore.fakestoreapp.models.user.Address;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * This Class Performs Logic Integration of various User Related Apis Coming from FakeStore User Details Apis.
  */
@@ -52,7 +55,40 @@ public class UserServiceImpl implements UserService {
     public User update(User user, Long userId) {
         FakeStoreUserDto fakeStoreUserRequestDtoInput = convertUserDetailsIntoFakeStoreUserDto(user);
         ResponseEntity<FakeStoreUserDto> response = fakeStoreClient.requestForEntity(UPDATE_USER, HttpMethod.PUT, fakeStoreUserRequestDtoInput, FakeStoreUserDto.class, userId);
-        return convertFakeStoreUserDtoIntoUserDetails(response.getBody());
+        User userResponse = convertFakeStoreUserDtoIntoUserDetails(response.getBody());
+        userResponse.setId(userId);
+        return userResponse;
+    }
+
+    /**
+     * This Method Fetches User Details for Particular UserId Provided.
+     *
+     * @param userId
+     * @return User
+     */
+    @Override
+    public User getUserDetails(Long userId) {
+        ResponseEntity<FakeStoreUserDto> response = fakeStoreClient.requestForEntity(UPDATE_USER, HttpMethod.GET, null, FakeStoreUserDto.class, userId);
+        User userResponse = convertFakeStoreUserDtoIntoUserDetails(response.getBody());
+        userResponse.setId(userId);
+        return userResponse;
+    }
+
+    /**
+     * This Method Fetches All User Details.
+     *
+     * @return List of User
+     */
+    @Override
+    public List<User> getAllUsers() {
+        ResponseEntity<FakeStoreUserDto[]> response = fakeStoreClient.requestForEntity(ADD_USER, HttpMethod.GET, null, FakeStoreUserDto[].class);
+        List<User> users = new ArrayList<>();
+        for (FakeStoreUserDto fakeStoreUserDto : response.getBody()) {
+            User userResponse = convertFakeStoreUserDtoIntoUserDetails(fakeStoreUserDto);
+            userResponse.setId(fakeStoreUserDto.getId());
+            users.add(userResponse);
+        }
+        return users;
     }
 
     /**
