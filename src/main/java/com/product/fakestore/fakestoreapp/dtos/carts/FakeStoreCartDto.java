@@ -13,7 +13,7 @@ public class FakeStoreCartDto {
     private Long id;
     private Long userId;
     private String date;
-    private List<FakeStoreProductDto> products = new ArrayList<>();
+    private FakeStoreProductDto [] products;
 
 }
 

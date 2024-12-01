@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * This Class Performs Logic Integration of Various Cart Related Apis Coming from FakeStore Cart Apis.
@@ -91,24 +92,36 @@ public class CartServiceImpl implements CartService {
      */
     private FakeStoreCartDto convertCartDetailsIntoFakeStoreCartDto(Cart cart) {
         FakeStoreCartDto fakeStoreCart = new FakeStoreCartDto();
+
+// Set the ID and UserID
         fakeStoreCart.setId(cart.getId());
-        Instant instant = cart.getDate().toInstant();
-        DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;
-        fakeStoreCart.setDate(formatter.format(instant));
         fakeStoreCart.setUserId(cart.getUserId());
-        if (cart.getProducts() != null) {
-            List<FakeStoreProductDto> fakeStoreProducts = new ArrayList<>();
-            for (Map.Entry<Long, Double> product : cart.getProducts().entrySet()) {
-                Long productId = product.getKey();
-                Double quantity = product.getValue();
-                FakeStoreProductDto fakeStoreProduct = new FakeStoreProductDto();
-                fakeStoreProduct.setProductId(productId);
-                fakeStoreProduct.setQuantity(quantity);
-                fakeStoreProducts.add(fakeStoreProduct);
-            }
-            fakeStoreCart.setProducts(fakeStoreProducts);
+
+// Convert the date
+        if (cart.getDate() != null) {
+            Instant instant = cart.getDate().toInstant();
+            DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;
+            fakeStoreCart.setDate(formatter.format(instant));
         }
+
+// Convert products map to an array of FakeStoreProductDto
+        if (cart.getProducts() != null && !cart.getProducts().isEmpty()) {
+            FakeStoreProductDto[] fakeStoreProducts = cart.getProducts().entrySet().stream()
+                    .map(entry -> {
+                        FakeStoreProductDto fakeStoreProduct = new FakeStoreProductDto();
+                        fakeStoreProduct.setProductId(entry.getKey());
+                        fakeStoreProduct.setQuantity(entry.getValue());
+                        return fakeStoreProduct;
+                    })
+                    .toArray(FakeStoreProductDto[]::new); // Convert the stream to an array
+            fakeStoreCart.setProducts(fakeStoreProducts);
+        } else {
+            fakeStoreCart.setProducts(new FakeStoreProductDto[0]); // Ensure products is never null
+        }
+
         return fakeStoreCart;
+
+
     }
 
     /**
@@ -124,11 +137,11 @@ public class CartServiceImpl implements CartService {
         Instant instant = Instant.parse(fakeStoreCart.getDate());
         cart.setDate(Date.from(instant));
         if (fakeStoreCart.getProducts() != null) {
-            Map<Long, Double> products = new HashMap<>();
-            for (FakeStoreProductDto fakeStoreProduct : fakeStoreCart.getProducts()) {
-                products.put(fakeStoreProduct.getProductId(), fakeStoreProduct.getQuantity());
-            }
+            Map<Long, Double> products = Arrays.stream(fakeStoreCart.getProducts())
+                    .collect(Collectors.toMap(FakeStoreProductDto::getProductId, FakeStoreProductDto::getQuantity));
             cart.setProducts(products);
+        } else {
+            cart.setProducts(Collections.emptyMap()); // Ensure products is never null
         }
         return cart;
     }
